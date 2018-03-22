@@ -2,7 +2,7 @@
 ; assemblerGame.asm
 ;
 ; Created: 3/15/2018 11:40:41 AM
-; Author : SpaceCampBoy
+; Author : Faizan & Tor
 
 
 LDI R19, 0x7
