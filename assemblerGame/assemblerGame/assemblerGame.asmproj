@@ -15,7 +15,7 @@
     <Name>assemblerGame</Name>
     <RootNamespace>assemblerGame</RootNamespace>
     <ToolchainFlavour>Native</ToolchainFlavour>
-    <EntryFile>$(MSBuildProjectDirectory)\SequenceTest.asm</EntryFile>
+    <EntryFile>$(MSBuildProjectDirectory)\testRandomNumberGenerator.asm</EntryFile>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
     <CacheFlash>true</CacheFlash>
@@ -106,13 +106,13 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="AsmFile1.asm">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="main.asm">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SequenceTest.asm">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="testRandomNumberGenerator.asm">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

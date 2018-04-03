@@ -9,7 +9,7 @@ STS 0x300, R19 ; UPDAING VALUE X IN SRAM
 
 
 ;----------------------------------------------------------
-;---------------------- GAME WELCOME ----------------------
+;----------------------- GAME START -----------------------
 ;----------------------------------------------------------
 ;BEFORE GAME START ALL LED LIGHTS SHOULD BLINK THREE TIMES
 GAME_START:
@@ -192,41 +192,53 @@ GAME_LOST:
 RCALL DELAY
 RJMP GAME_START				; START GAME AGAIN
 
-;----------------------------------------------------------
-; ------------------- DELAY -------------------------------
-;----------------------------------------------------------
-DELAY:
-	LDI r18, 255
-	LOOP_!:
-	LDI r19, 255
-	INNERLOOP_1:
-	LDI r20, 25
-	MOSTINNERLOOP_1:
-	DEC r20
-	BRNE MOSTINNERLOOP_1
-	DEC r19
-	BRNE INNERLOOP_1
-	DEC r18
-	BRNE LOOP_1
-	RET
+	;----------------------------------------------------------
+	; ------------------- DELAY -------------------------------
+	;----------------------------------------------------------
+	; DELAY CALCUCATOIN
+	; Clock frequency 10 MHz
+	; DELAY = 4.876.875 + 260.100 + 3825 + 4 + 1 * 1000 ns 
+	;		= 5.140.805 * 1000 ns = 5.072.719.000 
+	;	    = 
 
-;----------------------------------------------------------
-; ------------------- SHORT DELAY -------------------------
-;----------------------------------------------------------
-SHORT_DELAY:
-	LDI R18, 128
-	SHORT_LOOP_1:
-	LDI R19, 128
-	SHORT_INNERLOOP_1:
-	LDI R20, 15
-	SHORT_MOSTINNERLOOP_1:
-	DEC R20
-	BRNE SHORT_MOSTINNERLOOP_1
-	DEC R19
-	BRNE SHORT_INNERLOOP_1
-	DEC R18
-	BRNE SHORT_LOOP_1
-	RET
+	DELAY:
+		LDI r18, 255
+		LOOP_!:
+		LDI r19, 255
+		INNERLOOP_1:
+		LDI r20, 25
+		MOSTINNERLOOP_1:
+		DEC r20
+		BRNE MOSTINNERLOOP_1
+		DEC r19
+		BRNE INNERLOOP_1
+		DEC r18
+		BRNE LOOP_1
+		RET
+
+	;----------------------------------------------------------
+	; ------------------- SHORT DELAY -------------------------
+	;----------------------------------------------------------
+	; DELAY CALCUCATOIN
+	; Clock frequency 10 MHz
+	; DELAY = 737.280 + 65.536 + 640 + 4 + 1 * 1000 ns
+	;	    = 803.461 * 1000 ns 
+	;       =
+
+	SHORT_DELAY:
+		LDI R18, 128
+		SHORT_LOOP_1:
+		LDI R19, 128
+		SHORT_INNERLOOP_1:
+		LDI R20, 15
+		SHORT_MOSTINNERLOOP_1:
+		DEC R20
+		BRNE SHORT_MOSTINNERLOOP_1
+		DEC R19
+		BRNE SHORT_INNERLOOP_1
+		DEC R18
+		BRNE SHORT_LOOP_1
+		RET
 
 ;----------------------------------------------------------
 ; --------- RESET LIGHTS / TURN OFF ALL LIGHTS ------------

@@ -16,7 +16,7 @@ main:
 		rjmp main
 
 ;----------------------------------------------------------
-;---------------------- GAME WELCOME ----------------------
+;----------------------- GAME START -----------------------
 ;----------------------------------------------------------
 ;BEFORE GAME START ALL LED LIGHTS SHOULD BLINK THREE TIMES
 GAME_START:
@@ -35,7 +35,6 @@ WELCOME:
 ;----------------------------------------------------------
 ;---------------------- ROUND WON -------------------------
 ;----------------------------------------------------------
-
 ; ALL LIGHTS SHOULD BLINK IN SEQUENCE FROM LEFT TO RIGHT
 ROUND_WON:
 	LDI R16, 0x00
@@ -107,40 +106,54 @@ RCALL DELAY
 RET
 
 ;----------------------------------------------------------
-; ------------------- DELAY -------------------------------
+;-------------------- DELAY -------------------------------
 ;----------------------------------------------------------
-DELAY:
-	LDI r18, 255
-	loop_1:
-	LDI r19, 255
-	innerloop_1:
-	LDI r20, 25
-	mostinnerloop_1:
-	DEC r20
-	BRNE mostinnerloop_1
-	DEC r19
-	BRNE innerloop_1
-	DEC r18
-	BRNE loop_1
-	RET
+; DELAY CALCUCATOIN
+; Clock frequency 10 MHz
+; DELAY = 4.876.875 + 260.100 + 3825 + 4 + 1 * 1000 ns 
+;		= 5.140.805 * 1000 ns = 5.072.719.000 
+;	    = 
+
+
+DELAY:								;INSTRUCTION CYCLES
+	LDI r18, 255					; 1
+loop_1:							
+	LDI r19, 255					; 1
+innerloop_1:
+	LDI r20, 25						; 1
+mostinnerloop_1:
+	DEC r20							; 1
+	BRNE mostinnerloop_1			; 2/1
+	DEC r19							; 1
+	BRNE innerloop_1				; 2/1
+	DEC r18							; 1
+	BRNE loop_1						; 2/1
+	RET								; 4
 
 ;----------------------------------------------------------
 ; ------------------- SHORT DELAY -------------------------
 ;----------------------------------------------------------
-SHORT_DELAY:
-	LDI R18, 128
-	SHORT_loop_1:
-	LDI R19, 128
-	SHORT_innerloop_1:
-	LDI R20, 15
-	SHORT_mostinnerloop_1:
-	DEC R20
-	BRNE SHORT_mostinnerloop_1
-	DEC R19
-	BRNE SHORT_innerloop_1
-	DEC R18
-	BRNE SHORT_loop_1
-	RET
+; DELAY CALCUCATOIN
+; Clock frequency 10 MHz
+; DELAY = 737.280 + 65.536 + 640 + 4 + 1 * 1000 ns
+;	    = 803.461 * 1000 ns 
+;       =
+
+
+SHORT_DELAY:						; INSTRUCTION CYCLES
+	LDI R18, 128					; 1
+SHORT_loop_1:
+	LDI R19, 128					; 1
+SHORT_innerloop_1:
+	LDI R20, 15						; 1
+SHORT_mostinnerloop_1:
+	DEC R20							; 1
+	BRNE SHORT_mostinnerloop_1		; 2/1
+	DEC R19							; 1
+	BRNE SHORT_innerloop_1			; 1
+	DEC R18							; 1
+	BRNE SHORT_loop_1				; 2/1
+	RET								; 4
 
 ;----------------------------------------------------------
 ; --------- RESET LIGHTS / TURN OFF ALL LIGHTS ------------
