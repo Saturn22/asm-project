@@ -15,7 +15,7 @@
     <Name>assemblerGame</Name>
     <RootNamespace>assemblerGame</RootNamespace>
     <ToolchainFlavour>Native</ToolchainFlavour>
-    <EntryFile>$(MSBuildProjectDirectory)\main.asm</EntryFile>
+    <EntryFile>$(MSBuildProjectDirectory)\SequenceTest.asm</EntryFile>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
     <CacheFlash>true</CacheFlash>
@@ -106,7 +106,16 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AsmFile1.asm">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="main.asm">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MAIN_METHOD.asm">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SequenceTest.asm">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

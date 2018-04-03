@@ -7,6 +7,7 @@
 LDI R19, 0x7
 STS 0x300, R19 ; UPDAING VALUE X IN SRAM
 
+
 ;----------------------------------------------------------
 ;---------------------- GAME WELCOME ----------------------
 ;----------------------------------------------------------
@@ -23,7 +24,7 @@ WELCOME:
 	BRNE WELCOME
 
 ;----------------------------------------------------------
-;---------------------- GAME START ------------------------
+;----------------------- GAME INIT ------------------------
 ;----------------------------------------------------------
 ;------ from 301 sequence numbers are stored in memory-----
 
@@ -34,7 +35,7 @@ CLR R10
 ADD R10, R21
 LDI R22, 0
 LDI R27, 0
-LDI R23, 0b0000_0001	;R23 represent the start Level and will increment every time a person wins one level
+LDI R23, 0b0000_0001	; R23 represent the start Level and will increment every time a person wins one level
 LDI R24, 0b1000_0000	; R24 represent the end level - when R23 reaches R24 game ends
 
 LEVEL_LOOP:
@@ -52,7 +53,7 @@ LEVEL_LOOP:
 
 ;------------------- GENERATE OUTPUT VALUES AND SHOW THEM -----------------
 	INC R10
-	LDI ZL, 0x01		; POINT Z to address $301 in memory
+	LDI ZL, 0x01			; POINT Z to address $301 in memory
 	LDI ZH, 0x03
 	OUTPUT_LOOP:
 		INC R22				; Number of times the INPUT_LOOP should run
@@ -83,7 +84,7 @@ LEVEL_LOOP:
 		OUT DDRA, R17
 		RCALL DELAY
 
-;----------------------- RECEIVE INPUT OF USER -----------------
+;----------------------- RECEIVE INPUT FROM USER -----------------
 
 	LDI ZL, 0x01		; reseting the Z pointer to $301
 	LDI ZH, 0x03
@@ -196,17 +197,17 @@ RJMP GAME_START				; START GAME AGAIN
 ;----------------------------------------------------------
 DELAY:
 	LDI r18, 255
-	loop_1:
+	LOOP_!:
 	LDI r19, 255
-	innerloop_1:
+	INNERLOOP_1:
 	LDI r20, 25
-	mostinnerloop_1:
+	MOSTINNERLOOP_1:
 	DEC r20
-	BRNE mostinnerloop_1
+	BRNE MOSTINNERLOOP_1
 	DEC r19
-	BRNE innerloop_1
+	BRNE INNERLOOP_1
 	DEC r18
-	BRNE loop_1
+	BRNE LOOP_1
 	RET
 
 ;----------------------------------------------------------
@@ -214,17 +215,17 @@ DELAY:
 ;----------------------------------------------------------
 SHORT_DELAY:
 	LDI R18, 128
-	SHORT_loop_1:
+	SHORT_LOOP_1:
 	LDI R19, 128
-	SHORT_innerloop_1:
+	SHORT_INNERLOOP_1:
 	LDI R20, 15
-	SHORT_mostinnerloop_1:
+	SHORT_MOSTINNERLOOP_1:
 	DEC R20
-	BRNE SHORT_mostinnerloop_1
+	BRNE SHORT_MOSTINNERLOOP_1
 	DEC R19
-	BRNE SHORT_innerloop_1
+	BRNE SHORT_INNERLOOP_1
 	DEC R18
-	BRNE SHORT_loop_1
+	BRNE SHORT_LOOP_1
 	RET
 
 ;----------------------------------------------------------
