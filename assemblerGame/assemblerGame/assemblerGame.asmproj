@@ -112,9 +112,6 @@
     <Compile Include="main.asm">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MAIN_METHOD.asm">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="SequenceTest.asm">
       <SubType>Code</SubType>
     </Compile>
