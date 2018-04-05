@@ -27,7 +27,7 @@ main:
 
 
 ;----------------------------------------------------------
-;---------------------- GAME WELCOME ----------------------
+;----------------------- GAME START -----------------------
 ;----------------------------------------------------------
 WELCOME:
 	PUSH R21
@@ -51,7 +51,6 @@ WELCOME:
 ;----------------------------------------------------------
 ;---------------------- ROUND WON -------------------------
 ;----------------------------------------------------------
-
 ; ALL LIGHTS SHOULD BLINK IN SEQUENCE FROM LEFT TO RIGHT
 ROUND_WON:
 	PUSH R16
@@ -147,8 +146,9 @@ GAME_LOST:
 	RET
 
 ;----------------------------------------------------------
-; ------------------- DELAY -------------------------------
+;-------------------- DELAY -------------------------------
 ;----------------------------------------------------------
+<<<<<<< HEAD
 DELAY:
 	PUSH R18
 	PUSH R19
@@ -171,10 +171,34 @@ DELAY:
 	POP R19
 	POP R18
 	RET
+=======
+; DELAY CALCUCATOIN
+; Clock frequency 10 MHz
+; DELAY = 4.876.875 + 260.100 + 3825 + 4 + 1 * 1000 ns 
+;		= 5.140.805 * 1000 ns = 5.072.719.000 
+;	    = 
+
+
+DELAY:								;INSTRUCTION CYCLES
+	LDI r18, 255					; 1
+loop_1:							
+	LDI r19, 255					; 1
+innerloop_1:
+	LDI r20, 25						; 1
+mostinnerloop_1:
+	DEC r20							; 1
+	BRNE mostinnerloop_1			; 2/1
+	DEC r19							; 1
+	BRNE innerloop_1				; 2/1
+	DEC r18							; 1
+	BRNE loop_1						; 2/1
+	RET								; 4
+>>>>>>> 12c8cd566983e2bb75ced5df39ea7f71b9f4770a
 
 ;----------------------------------------------------------
 ; ------------------- SHORT DELAY -------------------------
 ;----------------------------------------------------------
+<<<<<<< HEAD
 SHORT_DELAY:
 	PUSH R18
 	PUSH R19
@@ -197,6 +221,29 @@ SHORT_DELAY:
 	POP R19
 	POP R18
 	RET
+=======
+; DELAY CALCUCATOIN
+; Clock frequency 10 MHz
+; DELAY = 737.280 + 65.536 + 640 + 4 + 1 * 1000 ns
+;	    = 803.461 * 1000 ns 
+;       =
+
+
+SHORT_DELAY:						; INSTRUCTION CYCLES
+	LDI R18, 128					; 1
+SHORT_loop_1:
+	LDI R19, 128					; 1
+SHORT_innerloop_1:
+	LDI R20, 15						; 1
+SHORT_mostinnerloop_1:
+	DEC R20							; 1
+	BRNE SHORT_mostinnerloop_1		; 2/1
+	DEC R19							; 1
+	BRNE SHORT_innerloop_1			; 1
+	DEC R18							; 1
+	BRNE SHORT_loop_1				; 2/1
+	RET								; 4
+>>>>>>> 12c8cd566983e2bb75ced5df39ea7f71b9f4770a
 
 ;----------------------------------------------------------
 ; --------- RESET LIGHTS / TURN OFF ALL LIGHTS ------------
