@@ -54,10 +54,10 @@
       <ToolNumber>0045E55080FD</ToolNumber>
       <ToolName>STK600</ToolName>
     </com_atmel_avrdbg_tool_stk600>
-<<<<<<< HEAD
     <avrtoolinterface>ISP</avrtoolinterface>
 <<<<<<< HEAD
     <avrtoolinterfaceclock>0</avrtoolinterfaceclock>
+<<<<<<< HEAD
 =======
     <avrtoolinterface>
     </avrtoolinterface>
@@ -66,6 +66,8 @@
 =======
     <avrtoolinterfaceclock>125000</avrtoolinterfaceclock>
 >>>>>>> parent of 637fc50... .
+=======
+>>>>>>> parent of 38ca08e... Merge branch 'master' of https://github.com/spaceCampBoy/asm-project
     <com_atmel_avrdbg_tool_simulator>
       <ToolOptions>
         <InterfaceProperties>
@@ -116,9 +118,6 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="inputTest.asm">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="main.asm">
       <SubType>Code</SubType>
     </Compile>

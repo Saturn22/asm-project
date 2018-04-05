@@ -4,95 +4,95 @@
 ; Created: 3/15/2018 11:40:41 AM
 ; Author : Faizan & Tor
 
-;----------------------------------------------------------
-;--------------------- CONFIGURATION ----------------------
-;----------------------------------------------------------
-; stack setup
-ldi r16, high(RAMEND)	; 0x21
-out sph, r16
-ldi r16, low(RAMEND)	; 0xff
-out spl, r16
-
 LDI R19, 0x7
-STS 0x300, R19		; X = 7 |  STORING X VALUE IN SRAM FOR RANDOM NUMBER GENERATOR
-;NOTE: R0 IS USED TO REPRESENT THE VALUE OF X FOR RANDOM NUMBER GENERATOR
-ldi r17, 0xff		; 1111_1111 this is used for setting up the output port
-out ddra, r17
+STS 0x300, R19 ; UPDAING VALUE X IN SRAM
 
 
 ;----------------------------------------------------------
 ;----------------------- GAME START -----------------------
 ;----------------------------------------------------------
-;---- from $301, sequence numbers are stored in memory ----
-
+;BEFORE GAME START ALL LED LIGHTS SHOULD BLINK THREE TIMES
 GAME_START:
-	CALL WELCOME			; SHOW WELCOME SEQUENCE	
+	LDI R21, 0x3
+WELCOME:
+	LDI R17, 0b1111_1111 ; SAVE REGISTERS VALUES TO TURN ALL LIGHTS ON
+	OUT DDRA, R17		 ; TURN ALL LEDS ON
+	RCALL DELAY
+	RCALL RESET_LIGHTS
+	RCALL DELAY			 ; TIME DELAY
+	DEC R21
+	BRNE WELCOME
 
-	LDI R23, 0b0000_0001	; R23 IS USED FOR CALCULATING THE CURRENT LEVEL
-	LDI R24, 0b1111_1111	; R24 represent the end level - when R27 reaches R24 game ends
-	LDI R27, 0				; R27 REPRESENTS THE ACTUAL LEVEL | AT START OF THE GAME IT IS CLEARED
+;----------------------------------------------------------
+;----------------------- GAME INIT ------------------------
+;----------------------------------------------------------
+;------ from 301 sequence numbers are stored in memory-----
 
-	LDI R21, 1				; R21 REPRESENTS QUANTITY OF OUTPUT VALUES | INCREASES WITH EVERY LEVEL
-	LDI R22, 0				; R22 REPRESENTS QUANTITY OF INPUT VALUES | INCREASES WITH EVERY LEVEL
-	
+CLR R23
+CLR R27
+LDI R21, 1
+CLR R10
+ADD R10, R21
+LDI R22, 0
+LDI R27, 0
+LDI R23, 0b0000_0001	; R23 represent the start Level and will increment every time a person wins one level
+LDI R24, 0b1000_0000	; R24 represent the end level - when R23 reaches R24 game ends
 
-	LEVEL_LOOP:
-		;------------------- SHOW LEVEL LIGHTS AND WAIT FOR ANY INPUT -------------------
-		ADD R27, R23	; INCREASING LEVEL
-		ADD R23, R23	; INCREASE THIS FOR CALCULATING NEXT LEVEL 
-		LEVEL_LIGHT:
-			COM R27				 ; COMPLEMENTING R27 BECAUSE OF stk600
-			OUT PORTA, R27		 ; TURN LEVEL LEDS ON
-			COM R27				 ; COMPLEMENTING R27 BECAUSE OF stk600
-			CALL SHORT_DELAY
-			CALL RESET_LIGHTS	 ; RESET LIGHTS
-			CALL SHORT_DELAY
-			IN R17, PINB		 ; TRY TO RECIEVE INPUT FROM USER
-			COM R17				 ; COMPLEMENT R17 TO CHECK IF ANY INPUT WAS GIVEN
-			BREQ LEVEL_LIGHT
+LEVEL_LOOP:
+;------------------- SHOW LEVEL LIGHTS -------------------
+	ADD R27, R23
+	LEVEL_LIGHT:		
+		OUT DDRA, R27		 ; TURN LEVEL LEDS ON
+		RCALL DELAY
+		RCALL RESET_LIGHTS
+		RCALL DELAY
+		IN R17, PINB
+		COM R17
+		BREQ LEVEL_LIGHT
 
 
-	;------------------- GENERATE OUTPUT VALUES AND SHOW THEM -----------------
-		
-	LDI ZL, 0x01		; SET Z POINTER TO ADDRESS $301 IN MEMORY
+;------------------- GENERATE OUTPUT VALUES AND SHOW THEM -----------------
+	INC R10
+	LDI ZL, 0x01			; POINT Z to address $301 in memory
 	LDI ZH, 0x03
-	INC R21				; INCREMENT R21
 	OUTPUT_LOOP:
-		INC R22				; INCREMENT NUMBER OF TIME THE INPUT_LOOP SHOULD RUN
-		CALL RANDOM_LOOP	; GENERATE A RANDOM NUMBER FOR GENERATING AN OUTPUT NUMBER | SAVED IN R0 
-		OUTPUT_NUMBER:
-			LDI R25, 0b0000_0001				; STARTING VALUE OF OUTPUT NUMBER
-			DEC R0								; DEC R0 
-			BRNE OUTPUT_NUMBER_GENERATOR		; IF NOT 0, THEN BRANCH TO OUTPUT_NUMBER_GENERATOR 
-			RJMP SHOW_NUMBER					; ELSE JUMP TO SHOW NUMBER
+		INC R22				; Number of times the INPUT_LOOP should run
+		RCALL RANDOM_LOOP
+		NUMBER_1:
+			LDI R25, 0b0000_0001
+			DEC R0					; decrements the R0 to see if it is zero
+			BRNE NUMBER_1_LOOP		; If R0 is not 0, then jump to number_loop
+			RJMP SHOW_NUMBER
+				NUMBER_1_LOOP:
+					ADD R25,R25		; adding R25 two times
+					BREQ NUMBER_1	; If R25 = 0 then it goes back to R25 = 1
+					DEC R0			; decrementing R0 until 0
+					BRNE NUMBER_1_LOOP ; if R0 is not 0, then Loop on
+			SHOW_NUMBER:			; show generated number
+				CLR R17
+				ADD R17, R25
+				OUT DDRA, R17		 ; TURN NUMBER LIGHT ON
+				RCALL DELAY
+				RCALL DELAY
+				RCALL RESET_LIGHTS
+				RCALL DELAY
+		ST Z+, R25				; save number in memory and increment the address by 1
+		DEC R10					; decrement R21 
+		BRNE OUTPUT_LOOP		; if R20 is not zero, go back and output another number
 
-				OUTPUT_NUMBER_GENERATOR:
-					ADD R25,R25						; SUM R25 WITH ITSELF TO SHIFT ITS VALUES TO LEFT
-					BREQ OUTPUT_NUMBER				; IF R25 = 0 THEN IT BRANCHES TO OUTPUT_NUMBER AND STARTS OVER WITH R25 = 1
-					DEC R0							; DEC R0 UNTIL 0
-					BRNE OUTPUT_NUMBER_GENERATOR	; IF NOT 0, THEN LOOP ON
-
-			SHOW_NUMBER: 
-				COM R25				 ; COMPLEMENTING R27 BECAUSE OF stk600
-				OUT PORTA, R25		 ; TURN ON LED OF GENERATED NUMBER
-				COM R25				 ; COMPLEMENTING R27 BECAUSE OF stk600
-				CALL DELAY			 ; DELAY
-				CALL DELAY
-				CALL RESET_LIGHTS	 ; RESET LIGHTS
-				CALL DELAY
-
-		ST Z+, R25				; SAVE NUMBER IN MEMORY AND INCREASE THE ADDRESS BY ONE
-		DEC R21					; DEC R21 
-		BRNE OUTPUT_LOOP		; IF NOT ZERO GO BACK AND OUTPUT ANOTHER NUMBER
+		LDI R17, 0x0
+		OUT DDRA, R17
+		RCALL DELAY
 
 ;----------------------- RECEIVE INPUT FROM USER -----------------
 
-	LDI ZL, 0x01		; RESET THE Z POINTER TO ADDRESS $301 IN MEMORY
+	LDI ZL, 0x01		; reseting the Z pointer to $301
 	LDI ZH, 0x03
-
 	INPUT_LOOP:		
-		INC R21				; INCREMENT NUMBER OF TIME THE OUTPUT_LOOP SHOULD RUN
-		LD R17, Z+			; LOAD VALUE FROM MEMORY AND INCREMENT THE ADDRESS BY ONE.
+		INC R10
+		LD R17, Z+				; Gets value from stack.
+		OUT DDRA, R17			; SHOW HINT
+		RCALL DELAY
 
 		I1:		
 			IN r16, pinb		; Gets input from button.
@@ -100,45 +100,21 @@ GAME_START:
 			COM R16				
 			BREQ I1				; Check if a button has been pressed. If not it keeps looping 
 			
-		;--------------- Check if input is correct --------------
-		CP R16, R17				; COMPARE INPUT VALUE WITH SAVED OUTPUT VALUE | R16 WITH R17
-		BREQ INPUT_CORRECT
-		RJMP GAME_LOST			; BRANCH TO GAME_LOST IF NOT EQUAL
+		; Checks if input is correct
+		CP R16, R17				; compares R16 with R17
+		BRNE GAME_LOST			; If equals goes to check. 
 
-		;-------------- If input is correct	----------------
-		INPUT_CORRECT:
-			CALL DELAY			
-			DEC R22					; IF INPUT WAS CORRECT DEC R22 by 1.
-			BRNE  INPUT_LOOP		; If R22 = 0 the round was won.
-			CALL ROUND_WON	
-	;------------- CHECK IF FINAL LEVEL ------------
-	CP R27, R24					; CHECK IF IT WAS THE FINAL LEVEL
-	BREQ GAME_WON				; IF LEVEL EQUALS FINAL LEVEL THE GAME IS WON
-	RCALL LEVEL_LOOP			; ELSE GO TO NEXT LEVEL
+		; If input is correct	 
+		RCALL DELAY			
+		DEC R22					; If input was correct it decreases R22 by 1.
+		BRNE  INPUT_LOOP		; If R22 = 0 the round was won.
+		RCALL ROUND_WON	
 
+	ADD R23, R23				; Incease level by one. 
+	CP R23, R24			
+	BREQ GAME_WON				; If level equals final level game is won.
+	RCALL LEVEL_LOOP			; Else it goes to next level.
 
-
-;----------------------------------------------------------
-;---------------------- GAME WELCOME ----------------------
-;----------------------------------------------------------
-
-WELCOME:
-	PUSH R21
-	PUSH R17
-
-	LDI R21, 0x3	; R21 = 3 | TO RUN SEQUENCE 3 TIMES
-	WELCOME_LOOP:
-		LDI R17, 0b0000_0000 ; 0000_0000 TO TURN ALL LIGHTS ON
-		OUT PORTA, R17		 ; TURN ALL LEDS ON
-		CALL DELAY
-		CALL RESET_LIGHTS	 ; TURN ALL LEDS OFF
-		CALL DELAY			 ; TIME DELAY
-		DEC R21
-		BRNE WELCOME_LOOP
-
-	POP R17
-	POP R21
-	RET
 
 
 ;----------------------------------------------------------
@@ -146,70 +122,50 @@ WELCOME:
 ;----------------------------------------------------------
 ; ALL LIGHTS SHOULD BLINK IN SEQUENCE FROM LEFT TO RIGHT
 ROUND_WON:
-	PUSH R16
-	PUSH R21
-	PUSH R17
-
-	LDI R21, 0x3		; R21 = 3 | TO RUN SEQUENCE 3 TIMES
+	LDI R16, 0x00
+	OUT PORTA, R16
+	LDI R16, 0x3
 	ROUND_WON_LIGHTS_LOOP1:
-		LDI R16, 8				 ; TO RUN LOOP EIGHT TIMES TURNING ON ONE LED IN EACH LOOP (LEFT TO RIGHT)
+		LDI R21, 8				 ; TO RUN LOOP EIGHT TIMES
 		LDI R17, 0b0000_0001	 ; SAVE REGISTER VALUES TO TURN FIRST RIGHT LIGHT ON
 		ROUND_WON_LIGHTS_LOOP2:
-			COM R17
-			OUT PORTA, R17		 ; TURN LIGHT ON
-			COM R17
-			LSL R17				 ; SHIFT R17 BITMASK TO LEFT
-			RCALL SHORT_DELAY	 ; SHORT DELAY
-			DEC R16				 ; DECREASE R16 UNTIL 0
-			BRNE ROUND_WON_LIGHTS_LOOP2		; IF R16 NOT 0 THEN BRANCH TO TURN NEXT LED ON
-		DEC R21							; DECREASE R21 UNTIL 0
-		BRNE ROUND_WON_LIGHTS_LOOP1		; IF R16 NOT 0 THEN BRANCH
-	CALL RESET_LIGHTS			 ; RESET LIGHTS
-
-	POP R17
-	POP R21
-	POP R16
+			OUT DDRA, R17		 ; TURN LIGHT ON
+			ADD R17, R17		 ; PREPARE REGISTER VALUES TO TURN NEXT LIGHT ON
+			RCALL SHORT_DELAY	 ; SMALL DELAY
+			DEC R21
+			BRNE ROUND_WON_LIGHTS_LOOP2
+		DEC R16
+		BRNE ROUND_WON_LIGHTS_LOOP1
+	RCALL RESET_LIGHTS			 ; RESET LIGHTS
+	LDI R17, 0xff
+	OUT DDRA, R17
 	RET
 
 
 ;----------------------------------------------------------
 ;---------------------- GAME WON --------------------------
 ;----------------------------------------------------------
-; HALF OF LIGHTS SHOULD BLINK IN SEQUENCE FROM FAR LEFT TO RIGHT,
-; HALF FROM FAR RIGHT TO LEFT, MEETING TOGETHER IN MIDDLE(LIKE A CLAP)
+; ALL LIGHTS SHOULD BLINK TOGETHER FOR A LONG TIME
 GAME_WON:
-	PUSH R17
-	PUSH R21
-	
-	LDI R21, 0x32			; R21 = 50 | TO RUN SEQUENCE 50 TIMES
+	LDI R16, 0x00
+	OUT PORTA, R16
+	LDI R21, 0x30
 	END_GAME_LOOP:
-		LDI R17, 0b0111_1110	; SAVE REGISTERS VALUES
-		OUT PORTA, R17		 ; TURN ALL LEDS ON
-		CALL SHORT_DELAY	 ; SHORT DELAY
-		
-		LDI R17, 0b0011_1100	; SAVE REGISTERS VALUES
-		OUT PORTA, R17		 ; TURN ALL LEDS ON
-		CALL SHORT_DELAY	 ; SHORT DELAY
+		LDI R17, 0b1111_1111 ; SAVE REGISTERS VALUES TO TURN ALL LIGHTS ON
+		OUT DDRA, R17		 ; TURN ALL LEDS ON
+		RCALL SHORT_DELAY
+		RCALL RESET_LIGHTS
+		RCALL SHORT_DELAY	 ; SHORT TIME DELAY
+		DEC R21
+		BRNE END_GAME_LOOP
+	RCALL RESET_LIGHTS		 ; RESET LIGHTS
+	RCALL DELAY
+	RCALL DELAY
+	LDI R17, 0xff
+	OUT DDRA, R17
 
-		LDI R17, 0b0001_1000	; SAVE REGISTERS VALUES
-		OUT PORTA, R17		 ; TURN ALL LEDS ON
-		CALL SHORT_DELAY	 ; SHORT DELAY
+RJMP Welcome				 ; START GAME AGAIN
 
-		LDI R17, 0b0000_0000	; SAVE REGISTERS VALUES
-		OUT PORTA, R17		 ; TURN ALL LEDS ON
-		CALL SHORT_DELAY	 ; SHORT DELAY
-
-		CALL RESET_LIGHTS	 ; TURN ALL LEDS OFF
-		DEC R21				 ; DESCREASE R21 UNTIL 0
-		BRNE END_GAME_LOOP	 ; BRANCH IF NOT 0
-	CALL RESET_LIGHTS		 ; RESET LIGHTS
-	CALL DELAY				; DELAY
-	CALL DELAY				; DELAY
-
-	POP R21
-	POP R17
-
-RJMP GAME_START				 ; START GAME AGAIN
 
 ;----------------------------------------------------------
 ;---------------------- GAME LOST -------------------------
@@ -217,27 +173,25 @@ RJMP GAME_START				 ; START GAME AGAIN
 ; ALL LIGHTS SHOULD TURN ON TOGETHER FOR A LONG TIME
 
 GAME_LOST:
-	PUSH R17
-	PUSH R21
-
-	LDI R17, 0b0000_0000 ; SAVE REGISTERS VALUES TO TURN ALL LIGHTS ON
-	OUT PORTA, R17		 ; TURN ALL LIGHTS ON
-
-	LDI R21, 0x14		 ; R21 = 20 | TO RUN DELAY SEQUENCE 20 TIMES
+	LDI R16, 0x00
+	OUT PORTA, R16
+	LDI R17, 0b1111_1111 ; SAVE REGISTERS VALUES TO TURN ALL LIGHTS ON
+	OUT DDRA, R17		 ; TURN ALL LIGHTS ON
+	LDI R16, 0x11
 	GAME_LOST_DELAY:	 ; DELAY TO KEEP LIGHTS LIT FOR LONG TIME
-		CALL DELAY
-		DEC R21		
+		RCALL DELAY
+		DEC R16
 		BRNE GAME_LOST_DELAY
+	RCALL RESET_LIGHTS	 ; RESET LIGHTS
+	RCALL DELAY
+	RCALL DELAY
+	LDI R17, 0xff
+	OUT DDRA, R17
 
-	CALL RESET_LIGHTS	 ; RESET LIGHTS
-	CALL DELAY			 ; DELAY
-	CALL DELAY
-
-	POP R21
-	POP R17
-
+RCALL DELAY
 RJMP GAME_START				; START GAME AGAIN
 
+<<<<<<< HEAD
 ;----------------------------------------------------------
 ; ------------------- DELAY -------------------------------
 ;----------------------------------------------------------
@@ -302,17 +256,62 @@ SHORT_DELAY:									; INSTRUCTION CYCLES
 	POP R18										; 2	
 	RET											; 4
 
+=======
+	;----------------------------------------------------------
+	; ------------------- DELAY -------------------------------
+	;----------------------------------------------------------
+	; DELAY CALCUCATOIN
+	; Clock frequency 10 MHz
+	; DELAY = 4.876.875 + 260.100 + 3825 + 4 + 1 * 1000 ns 
+	;		= 5.140.805 * 1000 ns = 5.072.719.000 
+	;	    = 
+
+	DELAY:
+		LDI r18, 255
+		LOOP_!:
+		LDI r19, 255
+		INNERLOOP_1:
+		LDI r20, 25
+		MOSTINNERLOOP_1:
+		DEC r20
+		BRNE MOSTINNERLOOP_1
+		DEC r19
+		BRNE INNERLOOP_1
+		DEC r18
+		BRNE LOOP_1
+		RET
+
+	;----------------------------------------------------------
+	; ------------------- SHORT DELAY -------------------------
+	;----------------------------------------------------------
+	; DELAY CALCUCATOIN
+	; Clock frequency 10 MHz
+	; DELAY = 737.280 + 65.536 + 640 + 4 + 1 * 1000 ns
+	;	    = 803.461 * 1000 ns 
+	;       =
+
+	SHORT_DELAY:
+		LDI R18, 128
+		SHORT_LOOP_1:
+		LDI R19, 128
+		SHORT_INNERLOOP_1:
+		LDI R20, 15
+		SHORT_MOSTINNERLOOP_1:
+		DEC R20
+		BRNE SHORT_MOSTINNERLOOP_1
+		DEC R19
+		BRNE SHORT_INNERLOOP_1
+		DEC R18
+		BRNE SHORT_LOOP_1
+		RET
+>>>>>>> parent of 38ca08e... Merge branch 'master' of https://github.com/spaceCampBoy/asm-project
 
 ;----------------------------------------------------------
 ; --------- RESET LIGHTS / TURN OFF ALL LIGHTS ------------
 ;----------------------------------------------------------
 RESET_LIGHTS:
-	PUSH R17
-
-	LDI R17, 0b1111_1111 ; SAVE REGISTERS VALUES TO TURN ALL LIGHTS OFF
-	OUT PORTA, R17		 ; TURN ALL LEDS OFF
-
-	POP R17
+	LDI R17, 0b0000_0000 ; SAVE REGISTERS VALUES TO TURN ALL LIGHTS OFF
+	OUT DDRA, R17		 ; TURN ALL LEDS OFF
 	RET
 
 
@@ -324,31 +323,35 @@ RESET_LIGHTS:
 ; where a and c are relativly prime for better randomness
 ; and X is stored in internal storage so it can be used as a seed for every calculation
 RANDOM_LOOP:
-	PUSH R16
-	PUSH R17
-	PUSH R18
+	LDI R16, 0x1D
+	LDI R17, 0xB
+	LDI R18, 0x3B
+	LDI R19, 0x7
 
-	LDI R16, 0x1D		; a = 29 
-	LDI R17, 0xB		; c = 11 
-	LDI R18, 0x3B		; m = 59 
-	LDS R0, 0x300		; GET VALUE X IN SRAM
+	LDS R0, 0x300 ; GET VALUE X IN SRAM
+	ADD R1, R16	; a = 29 
+	ADD R2, R17	; c = 11 
+	ADD R3, R18	; m = 59 
 
-	;--------- applying the formula-------
-	MUL R0,R16
-	ADD R0,R17
+;--------- applying the formula-------
+MUL R0,R1
+ADD R0,R2
 
-	;-------module calculation---------
-	L1: 
-		SUB	R0, R18
-		BRCC L1		; BRANCH IF C IS ZERO
+;-------module calculation---------
+L1: 
+	SUB	R0, R3
+	BRCC L1		; BRANCH IF C IS ZERO
 
-		ADD R0, R18	; ADD BACK TO IT
+	ADD R0, R3	; ADD BACK TO IT
 
-	STS 0x300, R0 ; UPDAING VALUE X IN SRAM
+STS 0x300, R0 ; UPDAING VALUE X IN SRAM
 
-	;------ DONE CALCULATING X(R0) VALUE-----
-
+<<<<<<< HEAD
 	POP R18
 	POP R17
 	POP R16
 	RET
+=======
+;------ DONE CALCULATING X VALUE-----
+RET
+>>>>>>> parent of 38ca08e... Merge branch 'master' of https://github.com/spaceCampBoy/asm-project
