@@ -108,7 +108,7 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="outputTest.asm">
+    <Compile Include="inputTest.asm">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="main.asm">
