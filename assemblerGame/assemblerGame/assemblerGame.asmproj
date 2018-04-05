@@ -55,8 +55,14 @@
       <ToolNumber>0045E55080FD</ToolNumber>
       <ToolName>STK600</ToolName>
     </com_atmel_avrdbg_tool_stk600>
+<<<<<<< HEAD
     <avrtoolinterface>ISP</avrtoolinterface>
     <avrtoolinterfaceclock>0</avrtoolinterfaceclock>
+=======
+    <avrtoolinterface>
+    </avrtoolinterface>
+    <avrtoolinterfaceclock>125000</avrtoolinterfaceclock>
+>>>>>>> 3c25d8ecd44ffc48347fc199cd99d844a7fdccc0
     <com_atmel_avrdbg_tool_simulator>
       <ToolOptions>
         <InterfaceProperties>
@@ -106,6 +112,9 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="inputTest.asm">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="main.asm">
       <SubType>Code</SubType>
     </Compile>
