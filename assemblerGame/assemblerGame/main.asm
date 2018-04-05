@@ -239,7 +239,6 @@ GAME_LOST:
 
 RJMP GAME_START				; START GAME AGAIN
 
-<<<<<<< HEAD
 ;----------------------------------------------------------
 ; ------------------- DELAY -------------------------------
 ;----------------------------------------------------------
@@ -291,55 +290,6 @@ SHORT_DELAY:
 	POP R19
 	POP R18
 	RET
-=======
-	;----------------------------------------------------------
-	; ------------------- DELAY -------------------------------
-	;----------------------------------------------------------
-	; DELAY CALCUCATOIN
-	; Clock frequency 10 MHz
-	; DELAY = 4.876.875 + 260.100 + 3825 + 4 + 1 * 1000 ns 
-	;		= 5.140.805 * 1000 ns = 5.072.719.000 
-	;	    = 
-
-	DELAY:
-		LDI r18, 255
-		LOOP_!:
-		LDI r19, 255
-		INNERLOOP_1:
-		LDI r20, 25
-		MOSTINNERLOOP_1:
-		DEC r20
-		BRNE MOSTINNERLOOP_1
-		DEC r19
-		BRNE INNERLOOP_1
-		DEC r18
-		BRNE LOOP_1
-		RET
-
-	;----------------------------------------------------------
-	; ------------------- SHORT DELAY -------------------------
-	;----------------------------------------------------------
-	; DELAY CALCUCATOIN
-	; Clock frequency 10 MHz
-	; DELAY = 737.280 + 65.536 + 640 + 4 + 1 * 1000 ns
-	;	    = 803.461 * 1000 ns 
-	;       =
-
-	SHORT_DELAY:
-		LDI R18, 128
-		SHORT_LOOP_1:
-		LDI R19, 128
-		SHORT_INNERLOOP_1:
-		LDI R20, 15
-		SHORT_MOSTINNERLOOP_1:
-		DEC R20
-		BRNE SHORT_MOSTINNERLOOP_1
-		DEC R19
-		BRNE SHORT_INNERLOOP_1
-		DEC R18
-		BRNE SHORT_LOOP_1
-		RET
->>>>>>> 12c8cd566983e2bb75ced5df39ea7f71b9f4770a
 
 
 ;----------------------------------------------------------

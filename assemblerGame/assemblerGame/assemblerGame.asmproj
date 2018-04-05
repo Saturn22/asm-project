@@ -108,12 +108,9 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-<<<<<<< HEAD
     <Compile Include="outputTest.asm">
       <SubType>Code</SubType>
     </Compile>
-=======
->>>>>>> 12c8cd566983e2bb75ced5df39ea7f71b9f4770a
     <Compile Include="main.asm">
       <SubType>Code</SubType>
     </Compile>
