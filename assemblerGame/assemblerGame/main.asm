@@ -144,7 +144,6 @@ WELCOME:
 ;----------------------------------------------------------
 ;---------------------- ROUND WON -------------------------
 ;----------------------------------------------------------
-
 ; ALL LIGHTS SHOULD BLINK IN SEQUENCE FROM LEFT TO RIGHT
 ROUND_WON:
 	PUSH R16
@@ -243,63 +242,65 @@ RJMP GAME_START				; START GAME AGAIN
 ; ------------------- DELAY -------------------------------
 ;----------------------------------------------------------
 ; DELAY CALCUCATOIN
-; Clock frequency 10 MHz
-; DELAY = 4.876.875 + 260.100 + 3825 + 4 + 1 * 1000 ns 
-;		= 5.140.805 * 1000 ns = 5.072.719.000 
-;	    = 
-DELAY:
-	PUSH R18
-	PUSH R19
-	PUSH R20
+; Clock frequency = 125 kHz = 0,125 MHz
+; 1 Machine cycle = 8 ns
+; DELAY = ((74 * 1018 * 1018)  + 12 + 4 + 1) * 8ns
+;		= (76687976 + 17) * 8ns
+;	    = 613503944 ns = 0.613 seconds.
+DELAY:										; INSTRUCTION CYCLES
+	PUSH R18								; 2
+	PUSH R19								; 2	
+	PUSH R20								; 2
 
-	LDI r18, 255
+	LDI r18, 255							; 1
 	LOOP_1:
-		LDI r19, 255
+		LDI r19, 255						; 1
 		INNERLOOP_1:
-			LDI r20, 25
+			LDI r20, 25						; 1
 				MOSTINNERLOOP_1:
-				DEC r20
-				BRNE MOSTINNERLOOP_1
-			DEC r19
-			BRNE INNERLOOP_1
-		DEC r18
-		BRNE LOOP_1
+				DEC r20						; 1
+				BRNE MOSTINNERLOOP_1		; 2/1
+			DEC r19							; 1
+			BRNE INNERLOOP_1				; 2/1
+		DEC r18								; 1
+		BRNE LOOP_1							; 2/1
 
-	POP R20
-	POP R19
-	POP R18
-	RET
+	POP R20									; 2
+	POP R19									; 2
+	POP R18									; 2
+	RET										; 4
 
 ;----------------------------------------------------------
 ; ------------------- SHORT DELAY -------------------------
 ;----------------------------------------------------------
 ; DELAY CALCUCATOIN
-; Clock frequency 10 MHz
-; DELAY = 737.280 + 65.536 + 640 + 4 + 1 * 1000 ns
-;	    = 803.461 * 1000 ns 
-;       =
-SHORT_DELAY:
-	PUSH R18
-	PUSH R19
-	PUSH R20
+; Clock frequency = 125 kHz = 0,125 MHz
+; 1 Machine cycle = 8 ns
+; DELAY = ((44 * 384 * 384)	+ 12 + 4 + 1) * 8 ns
+;	    = (6488064 + 17) * 8
+;       = 51904648 ns = 0,0519 seconds.
+SHORT_DELAY:									; INSTRUCTION CYCLES
+	PUSH R18									; 2		
+	PUSH R19									; 2	
+	PUSH R20									; 2
 
-	LDI R18, 128
+	LDI R18, 128								; 1
 	SHORT_LOOP_1:
-		LDI R19, 128
+		LDI R19, 128							; 1
 		SHORT_INNERLOOP_1:
-			LDI R20, 15
+			LDI R20, 15							; 1
 				SHORT_MOSTINNERLOOP_1:
-				DEC R20
-				BRNE SHORT_MOSTINNERLOOP_1
-			DEC R19
-			BRNE SHORT_INNERLOOP_1
-		DEC R18
-		BRNE SHORT_LOOP_1
+				DEC R20							; 1
+				BRNE SHORT_MOSTINNERLOOP_1		; 2/1
+			DEC R19								; 1
+			BRNE SHORT_INNERLOOP_1				; 2/1
+		DEC R18									; 1
+		BRNE SHORT_LOOP_1						; 2/1
 
-	POP R20
-	POP R19
-	POP R18
-	RET
+	POP R20										; 2
+	POP R19										; 2
+	POP R18										; 2	
+	RET											; 4
 
 
 ;----------------------------------------------------------
@@ -350,5 +351,4 @@ RANDOM_LOOP:
 	POP R18
 	POP R17
 	POP R16
-
 	RET
